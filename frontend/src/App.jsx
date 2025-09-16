@@ -40,12 +40,12 @@ function App() {
   return (
     <div className="bg-gray-900 min-h-screen w-screen p-6 text-white">
       {/* Fixed top bar */}
-      <div className="fixed top-4 left-0 w-full z-50 bg-gray-900 shadow-lg">
+      <div className="fixed top-0 left-0 w-full z-50 bg-gray-900 shadow-lg">
         <div className="relative flex items-center justify-center px-6 py-4">
           <h1 className="text-3xl font-bold text-center w-full">
             📊 Stock Tracker - By Alexander Pålsson
           </h1>
-          <div className="absolute right-0 top-1/2 -translate-y-1/2">
+          <div className="absolute right-0 top-[10px]">
             <MenuList onLogout={handleLogout} onAbout={handleAbout} />
           </div>
         </div>
@@ -83,4 +83,3 @@ function App() {
 }
 
 export default App;
-git push
