@@ -46,7 +46,7 @@ function App() {
 
       {/* Full-width grid */}
       <div className="grid grid-cols-12 gap-6 w-full mx-auto">
-        {/* Sidebar: stock cards */}
+        {/* Sidebar: stock cards */}<
         <div className="col-span-4 flex flex-col gap-6">
           {tickers.map((ticker) => (
             <StockCard
