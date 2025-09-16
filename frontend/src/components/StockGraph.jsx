@@ -37,7 +37,7 @@ export default function StockGraph({ ticker }) {
 
   return (
     <div className="bg-gray-800 p-6 rounded-xl shadow-md w-full max-w-4xl">
-      <h3 className="text-lg font-bold mb-4">{ticker} – Price history</h3>
+      <h3 className="text-lg font-bold mb-4">{ticker} – {data?.info?.name || ticker}</h3>
       <div className="h-72">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data.prices}>
