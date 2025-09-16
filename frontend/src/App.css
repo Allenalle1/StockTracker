@@ -40,3 +40,48 @@
 .read-the-docs {
   color: #888;
 }
+
+.glow-ring {
+  box-shadow: 0 0 16px 4px #60a5fa, 0 0 32px 8px #3b82f6;
+  border-radius: 1rem;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.transition-all {
+  transition: all 150ms;
+}
+
+.duration-150 {
+  transition-duration: 150ms;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.h-80 {
+  height: 20rem;
+}
+
+.bg-transparent {
+  background-color: transparent;
+}
+
+.ring-2 {
+  --tw-ring-inset: var(--tw-empty, );
+  --tw-ring-offset-width: 2px;
+  --tw-ring-color: rgb(59 130 246 / 40%);
+  box-shadow: 0 0 0 2px rgb(59 130 246 / 40%);
+}
+
+.ring-blue-400 {
+  --tw-ring-color: #60a5fa;
+}
+
+.ring-offset-2 {
+  --tw-ring-offset-width: 2px;
+  --tw-ring-offset-color: #fff;
+}

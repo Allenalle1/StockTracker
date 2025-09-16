@@ -49,23 +49,21 @@ export default function StockGraph({ ticker }) {
   if (yMax > 10) yMax = Math.round(yMax);
 
   return (
-    <div className="bg-gray-800 p-6 rounded-xl shadow-md w-full max-w-4xl">
+    <div className="bg-gray-800 p-6 rounded-xl shadow-md w-full h-full">
       <h3 className="text-lg font-bold mb-4">{ticker} – {data?.info?.name || ticker}</h3>
-      <div className="h-72">
+      <div className="h-full min-h-[16rem]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={prices}>
             <CartesianGrid strokeDasharray="3 3" stroke="#444" />
             <XAxis
               dataKey="date"
               stroke="#ccc"
-              tickFormatter={(str) => {
-                const d = new Date(str);
-                return `${d.getMonth() + 1}/${d.getDate()}`; // MM/DD
-              }}
+              tick={false} // Hide X-axis text
             />
             <YAxis
               stroke="#ccc"
               domain={[yMin, yMax]}
+              // No tick={false} here, so Y-axis text is shown
             />
             <Tooltip
               contentStyle={{ backgroundColor: "#222", border: "none" }}

@@ -3,6 +3,10 @@ import express from "express";
 import cors from "cors";
 import yahooFinance from "yahoo-finance2";
 import { connectDB } from "./db.js";
+import axios from "axios";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 app.use(cors());
@@ -147,6 +151,28 @@ app.get("/api/user/stocks/:email", async (req, res) => {
     res.json({ stocks: user.stocks || [] });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/news/:ticker", async (req, res) => {
+  const { ticker } = req.params;
+  const apiKey = process.env.MARKETAUX_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: "Marketaux API key not set" });
+  }
+  try {
+    const response = await axios.get("https://api.marketaux.com/v1/news/all", {
+      params: {
+        symbols: ticker,
+        filter_entities: true,
+        language: "en",
+        api_token: apiKey,
+      },
+    });
+    res.json(response.data);
+  } catch (error) {
+    console.error("Marketaux error:", error.message);
+    res.status(500).json({ error: "Failed to fetch news" });
   }
 });
 

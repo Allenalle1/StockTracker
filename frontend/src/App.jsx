@@ -6,6 +6,7 @@ import StockCard from "./components/StockCard";
 import StockGraph from "./components/StockGraph";
 import AddStock from "./components/AddStock";
 import MenuList from "./components/MenuList";
+import StockNews from "./components/StockNews"; // <-- Import the news component
 
 // Utility function to format large numbers (e.g., Market Cap)
 const formatNumber = (num) => {
@@ -20,6 +21,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [tickers, setTickers] = useState([]);
   const [showSignup, setShowSignup] = useState(true);
+  const [selectedTicker, setSelectedTicker] = useState(null); // For showing news
 
   // Fetch user's stocks after login
   useEffect(() => {
@@ -29,11 +31,16 @@ function App() {
         .then((data) => {
           if (Array.isArray(data.stocks)) {
             setTickers(data.stocks);
+            if (data.stocks.length > 0) setSelectedTicker(data.stocks[0]);
           } else {
             setTickers([]);
+            setSelectedTicker(null);
           }
         })
-        .catch(() => setTickers([]));
+        .catch(() => {
+          setTickers([]);
+          setSelectedTicker(null);
+        });
     }
   }, [user]);
 
@@ -89,6 +96,7 @@ function App() {
         const data = await res.json();
         if (res.ok) {
           setTickers([...tickers, ticker]);
+          setSelectedTicker(ticker); // Show news for newly added ticker
         } else {
           alert(data.error || "Could not add stock");
         }
@@ -100,6 +108,11 @@ function App() {
 
   const handleRemoveTicker = (ticker) => {
     setTickers(tickers.filter((t) => t !== ticker));
+    // If the removed ticker was selected, select another or null
+    if (selectedTicker === ticker) {
+      const remaining = tickers.filter((t) => t !== ticker);
+      setSelectedTicker(remaining.length > 0 ? remaining[0] : null);
+    }
     // Optionally, add a backend route to remove a stock and call it here
   };
 
@@ -140,25 +153,44 @@ function App() {
         <p className="text-center mb-6">Welcome, {user.email} 👋</p>
         <AddStock onAdd={handleAddTicker} />
 
-        {/* Full-width grid */}
+        {/* 3-column grid: cards | graphs | news */}
         <div className="grid grid-cols-12 gap-6 w-full mx-auto">
           {/* Sidebar: stock cards */}
-          <div className="col-span-4 flex flex-col gap-6">
+          <div className="col-span-3 flex flex-col gap-6">
             {tickers.map((ticker) => (
               <StockCard
                 key={ticker}
                 ticker={ticker}
                 onRemove={handleRemoveTicker}
                 userEmail={user.email}
+                onClick={() => setSelectedTicker(ticker)}
+                isSelected={selectedTicker === ticker}
               />
             ))}
           </div>
 
-          {/* Main: graphs */}
-          <div className="col-span-8 flex flex-col gap-6">
+          {/* Center: all graphs */}
+          <div className="col-span-6 flex flex-col gap-6 h-full">
             {tickers.map((ticker) => (
-              <StockGraph key={ticker} ticker={ticker} />
+              <div
+                key={ticker}
+                className={`cursor-pointer transition-all duration-150 w-full h-80 bg-transparent outline-none ${
+                  selectedTicker === ticker
+                    ? "ring-2 ring-blue-400 ring-offset-2 shadow-lg shadow-blue-400/40 glow-ring"
+                    : ""
+                }`}
+                onClick={() => setSelectedTicker(ticker)}
+                style={{ minHeight: "20rem" }}
+                tabIndex={0} // Optional: if you want keyboard accessibility
+              >
+                <StockGraph ticker={ticker} />
+              </div>
             ))}
+          </div>
+
+          {/* Right: news for selected ticker */}
+          <div className="col-span-3">
+            {selectedTicker && <StockNews ticker={selectedTicker} />}
           </div>
         </div>
       </div>
