@@ -35,19 +35,38 @@ export default function StockGraph({ ticker }) {
   if (loading) return <div className="text-gray-400">Loading graph for {ticker}…</div>;
   if (error) return <div className="text-red-500">Error: {error}</div>;
 
+  // Find min and max close price in the last 30 days
+  const prices = data?.prices ?? [];
+  const closes = prices.map(p => p.close);
+  const minClose = Math.min(...closes);
+  const maxClose = Math.max(...closes);
+
+  let yMin = minClose * 0.98;
+  let yMax = maxClose * 1.02;
+
+  // Round to closest int if above 10
+  if (yMin > 10) yMin = Math.round(yMin);
+  if (yMax > 10) yMax = Math.round(yMax);
+
   return (
     <div className="bg-gray-800 p-6 rounded-xl shadow-md w-full max-w-4xl">
       <h3 className="text-lg font-bold mb-4">{ticker} – {data?.info?.name || ticker}</h3>
       <div className="h-72">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data.prices}>
+          <LineChart data={prices}>
             <CartesianGrid strokeDasharray="3 3" stroke="#444" />
             <XAxis
               dataKey="date"
               stroke="#ccc"
-              tickFormatter={(str) => new Date(str).toLocaleDateString()}
+              tickFormatter={(str) => {
+                const d = new Date(str);
+                return `${d.getMonth() + 1}/${d.getDate()}`; // MM/DD
+              }}
             />
-            <YAxis stroke="#ccc" />
+            <YAxis
+              stroke="#ccc"
+              domain={[yMin, yMax]}
+            />
             <Tooltip
               contentStyle={{ backgroundColor: "#222", border: "none" }}
               labelFormatter={(str) =>

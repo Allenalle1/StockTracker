@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-function StockCard({ ticker, onRemove }) {
+function StockCard({ ticker, onRemove, userEmail }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
@@ -18,6 +18,28 @@ function StockCard({ ticker, onRemove }) {
     }
     fetchStock();
   }, [ticker]);
+
+  async function handleRemove() {
+    if (!userEmail) {
+      alert("User not logged in.");
+      return;
+    }
+    try {
+      const res = await fetch("http://localhost:5000/api/user/remove-stock", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: userEmail, ticker }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        onRemove(ticker);
+      } else {
+        alert(data.error || "Could not remove stock");
+      }
+    } catch {
+      alert("Network error");
+    }
+  }
 
   if (error) {
     return (
@@ -45,7 +67,7 @@ function StockCard({ ticker, onRemove }) {
 
       {/* ❌ Remove button */}
       <button
-        onClick={() => onRemove(ticker)}
+        onClick={handleRemove}
         className="ml-4 bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
       >
         ❌

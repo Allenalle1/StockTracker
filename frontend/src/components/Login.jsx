@@ -1,14 +1,13 @@
 import { useState } from "react";
 
-export default function Login({ onLogin }) {
+export default function Login({ onLogin, onShowSignup }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   function handleSubmit(e) {
     e.preventDefault();
-    // For now just simulate login
     if (email && password) {
-      onLogin(email);
+      onLogin(email, password); // Pass both email and password
     } else {
       alert("Please enter both email and password.");
     }
@@ -56,6 +55,15 @@ export default function Login({ onLogin }) {
             Login
           </button>
         </form>
+        <div className="flex justify-center mt-4">
+          <button
+            className="text-green-400 underline"
+            type="button"
+            onClick={onShowSignup}
+          >
+            Sign up
+          </button>
+        </div>
       </div>
     </div>
   );

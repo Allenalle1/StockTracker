@@ -1,6 +1,7 @@
 // frontend/src/App.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Login from "./components/Login";
+import Signup from "./components/Signup";
 import StockCard from "./components/StockCard";
 import StockGraph from "./components/StockGraph";
 import AddStock from "./components/AddStock";
@@ -17,25 +18,108 @@ const formatNumber = (num) => {
 
 function App() {
   const [user, setUser] = useState(null);
-  const [tickers, setTickers] = useState(["AAPL", "MSFT", "TSLA"]);
+  const [tickers, setTickers] = useState([]);
+  const [showSignup, setShowSignup] = useState(true);
 
-  if (!user) {
-    return <Login onLogin={(email) => setUser({ email })} />;
+  // Fetch user's stocks after login
+  useEffect(() => {
+    if (user && user.email) {
+      fetch(`http://localhost:5000/api/user/stocks/${user.email}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data.stocks)) {
+            setTickers(data.stocks);
+          } else {
+            setTickers([]);
+          }
+        })
+        .catch(() => setTickers([]));
+    }
+  }, [user]);
+
+  // Handle login with backend
+  async function handleLogin(email, password) {
+    try {
+      const res = await fetch("http://localhost:5000/api/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setUser({ email: data.email });
+      } else {
+        alert(data.error || "Login failed");
+      }
+    } catch (err) {
+      alert("Network error");
+    }
   }
 
-  const handleAddTicker = (ticker) => {
-    if (!tickers.includes(ticker)) {
-      setTickers([...tickers, ticker]);
+  // Handle signup with backend
+  async function handleSignup(email, password) {
+    try {
+      const res = await fetch("http://localhost:5000/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert("Signup successful! You can now log in.");
+        setShowSignup(false);
+      } else {
+        alert(data.error || "Signup failed");
+      }
+    } catch (err) {
+      alert("Network error");
     }
-  };
+  }
+
+  // Add ticker and save to backend
+  async function handleAddTicker(ticker) {
+    if (!tickers.includes(ticker) && user && user.email) {
+      // Save to backend
+      try {
+        const res = await fetch("http://localhost:5000/api/user/add-stock", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: user.email, ticker }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setTickers([...tickers, ticker]);
+        } else {
+          alert(data.error || "Could not add stock");
+        }
+      } catch {
+        alert("Network error");
+      }
+    }
+  }
 
   const handleRemoveTicker = (ticker) => {
     setTickers(tickers.filter((t) => t !== ticker));
+    // Optionally, add a backend route to remove a stock and call it here
   };
 
   const handleLogout = () => setUser(null);
   const handleAbout = () =>
     alert("📊 Stock Tracker by Alexander Pålsson\nVersion 1.0");
+
+  if (!user) {
+    return showSignup ? (
+      <Signup
+        onSignup={handleSignup}
+        onShowLogin={() => setShowSignup(false)}
+      />
+    ) : (
+      <Login
+        onLogin={handleLogin}
+        onShowSignup={() => setShowSignup(true)}
+      />
+    );
+  }
 
   return (
     <div className="bg-gray-900 min-h-screen w-screen p-6 text-white">
@@ -65,7 +149,7 @@ function App() {
                 key={ticker}
                 ticker={ticker}
                 onRemove={handleRemoveTicker}
-                formatNumber={formatNumber}
+                userEmail={user.email}
               />
             ))}
           </div>
